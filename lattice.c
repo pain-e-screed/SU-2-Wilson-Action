@@ -60,10 +60,6 @@ void initialize_lattice(gsl_rng *r , lattice * lat1)
   long unsigned i;
   FORALLSITES(i)
   {
-    // gsl_matrix_complex_set_identity(temp_tup);
-    // gsl_matrix_complex_set_identity(temp_xup);
-    // gsl_matrix_complex_set_identity(temp_yup);
-    // gsl_matrix_complex_set_identity(temp_zup);
     gen_su2_matrix(temp_tup, r);
     gen_su2_matrix(temp_xup, r);
     gen_su2_matrix(temp_yup, r);
@@ -185,7 +181,7 @@ double partial_action(lattice * L, long unsigned index, int dir)
   int i;
   gsl_matrix_complex * A = gsl_matrix_complex_alloc(2,2);
   gsl_matrix_complex * B = gsl_matrix_complex_alloc(2,2);
-  gsl_complex total ;
+  gsl_complex total;
   long unsigned temp_index;
 
   total = gsl_complex_rect(0.0,0.0);
@@ -194,17 +190,9 @@ double partial_action(lattice * L, long unsigned index, int dir)
   {
     temp_index = hop_index(index,1,i,BACKWARD);
     plaquette(A, L,temp_index, dir, i);
-    plaquette(B, L,temp_index, i, dir);
+    plaquette(B, L,index, dir, i);
     total = gsl_complex_add(matrix_complex_trace(A),total);
-    total = gsl_complex_add(total,matrix_complex_trace(B));
-  }
-
-  FORALLDIR(i)
-  {
-    plaquette(A, L,index, dir, i);
-    plaquette(B, L,index, i, dir);
-    total = gsl_complex_add(matrix_complex_trace(A),total);
-    total = gsl_complex_add(total,matrix_complex_trace(B));
+    total = gsl_complex_add(matrix_complex_trace(B),total);
   }
 
   gsl_matrix_complex_free(A);
@@ -223,7 +211,7 @@ double action(lattice * L, double beta)
   {
     FORALLDIR(i)
     {
-      FORALLDIR(j)
+      FORALLDIRBUT(j,i)
       {
         plaquette(temp,L,index,i,j);
         total += GSL_REAL( matrix_complex_trace(temp)  );
@@ -327,7 +315,7 @@ double WilsonExpectation(lattice * L,gsl_rng *r,  int I, int J)
     {
       FORALLDIR(dir1)
       {
-        FORALLDIR(dir2)
+        FORALLDIRBUT(dir2,dir1)
         {
         temp+=WilsonRectangle(L,index,I,J,dir1,dir2);
         N++;

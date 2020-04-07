@@ -47,34 +47,35 @@ void AnnealingSchedule(lattice * L, gsl_rng *r )
   double beta;
   double step;
   double AccRej;
-  const int iter = 10;
+  const int iter = 30;
   double B[iter], X[iter],steps[iter];
   int i, j;
+  FILE * f_ptr;
 
-  beta = 0.01;
+  f_ptr = fopen("values.txt","w");
+  beta = 0.1;
   steps[0] = 0.5;
   for(i=1;i<iter;i++)
-    steps[i] = steps[i-1] * 0.8;
+    steps[i] = steps[i-1] * 0.9;
 
   for(j=0;j<iter;j++)
   {
-    for(int i=0;i<1000;i++)
+    for(int i=0;i<500;i++)
     {
       AccRej = AnnealStepLattice( L, r,beta,steps[j]);
-      if(i%300 == 1)
-      {
-        printf("Acceptance = %lf%%\n",100.0*AccRej );
-      }
     }
     B[j] = beta;
     X[j] =  CreutzRatio(L,r,1,1);
-    beta += 0.05;
+    beta += 0.1;
     //step *= 0.9;
+    if(!isnan(X[j]))
+      fprintf(f_ptr, "%lf %lf %lf\n",B[j]/4.0,log(4.0/B[j]), X[j]);
     printf("beta = %lf, X(1,1) = %lf\n",B[j],X[j]);
     printf("ln(g_0^2):%lf\n",log(4.0/B[j]) );
     printf("g_0^-2:%lf\n",B[j]/4.0 );
     printf("Action:%lf\n\n\n",action(L,B[j]));
   }
+  fclose(f_ptr);
 }
 //Test whether or not the real part of the trace of the link fields is greater than 1 or less than -1
 void TestPlaquettes(lattice * L)
@@ -96,5 +97,4 @@ void TestPlaquettes(lattice * L)
           print_matrix_complex(L->R[index]->link[dir1]);
         }
       }
-
 }
