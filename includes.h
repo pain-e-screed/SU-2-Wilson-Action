@@ -18,5 +18,6 @@
 #include "lattice.h"
 #include "random.h"
 #include "sim.h"
+#include "lanczos.h"
 
 #endif
