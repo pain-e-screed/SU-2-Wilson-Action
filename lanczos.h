@@ -1,10 +1,3 @@
 #include "includes.h"
-
-#ifndef _LANCZOS_
-#define _LANCZOS_
-#ifdef LANCZOS_FILE
-lattice * global_lattice
-#else
-extern lattice *global_lattice
-#endif
-#endif
+void WilsonDirac(gsl_vector_complex * input, gsl_vector_complex * output, void * ctxt)
+void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt) ,const int k  , void * data  );
