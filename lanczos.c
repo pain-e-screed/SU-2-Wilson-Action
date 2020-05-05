@@ -4,16 +4,21 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
 {
   lattice * L = (lattice * ) ctxt;
   gsl_matrix_complex * gamma_matrix[4];
+  gsl_matrix_complex * identity_gamma_minus[4];
+  gsl_matrix_complex * identity_gamma_plus[4];
+  gsl_vector_complex * temp_vec1 = gsl_vector_complex_alloc(8);
+  gsl_vector_complex * temp_vec2 = gsl_vector_complex_alloc(8);
   gsl_vector_complex_view output_vector_view;
 
   long unsigned site_index, vector_site_index, temp_site_index, temp_vector_site_index;
   //spin_index should either be a 0 or 1 for down/up respectively
   //color_index runs from 0 to 3, indicating t to z
-  unsigned int spin_index, color_index, sub_index;
-
+  unsigned int spin_index, color_index, sub_index,dir;
+  //Begin testing input vectors and matrices
   if(!gamma_matrix[0])
-    compute_gamma_matrices(&gamma_matrix[0]);
-
+    compute_gamma_matrices();
+  if(!identity_gamma_plus[0] || !identity_gamma_minus[0])
+    compute_gamma_identities();
   if(!output)
     output = gsl_vector_complex_alloc(8*N4);
 
@@ -28,6 +33,7 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
     printf("Input vector and output vector have mismatched lengths\n");
     exit(0);
   }
+  //End vec/matrix testing
 
   gsl_vector_complex_set_all(output,gsl_complex_rect(5.0,0.0));
   FORALLSITES(site_index)
