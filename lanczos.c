@@ -6,14 +6,18 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
   gsl_matrix_complex * gamma_matrix[4];
   gsl_matrix_complex * identity_gamma_minus[4];
   gsl_matrix_complex * identity_gamma_plus[4];
+  gsl_matrix_complex * temp_mat1 = gsl_matrix_complex_alloc(8,8);
+  gsl_matrix_complex * temp_mat2 = gsl_matrix_complex_alloc(8,8);
   gsl_vector_complex * temp_vec1 = gsl_vector_complex_alloc(8);
   gsl_vector_complex * temp_vec2 = gsl_vector_complex_alloc(8);
+
   gsl_vector_complex_view output_vector_view;
+  gsl_vector_complex_view input_vector_view1;
+  gsl_vector_complex_view input_vector_view2;
+
 
   long unsigned site_index, vector_site_index, temp_site_index, temp_vector_site_index;
-  //spin_index should either be a 0 or 1 for down/up respectively
-  //color_index runs from 0 to 3, indicating t to z
-  unsigned int spin_index, color_index, sub_index,dir;
+  unsigned int dir;
   //Begin testing input vectors and matrices
   if(!gamma_matrix[0])
     compute_gamma_matrices();
@@ -34,19 +38,26 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
     exit(0);
   }
   //End vec/matrix testing
-
-  gsl_vector_complex_set_all(output,gsl_complex_rect(5.0,0.0));
+  //If changing the value of m in the WD operator, this is where you'll do it
+  gsl_vector_complex_set_all(input,gsl_complex_rect(5.0,0.0));
   FORALLSITES(site_index)
   {
     vector_site_index = 8 * site_index;
     output_vector_view = gsl_vector_complex_subvector(output, vector_site_index, 8 );
-    for(spin_index=0;spin_index<2;spin_index++)
+    gsl_vector_complex_set_zero(temp_vec1);
+    FORALLDIR(dir)
     {
-      FORALLDIR(color_index)
-      {
-        sub_index = 4 * spin_index + color_index;
+      temp_site_index = hop_index(site_index,1, dir, BACKWARD);
+      input_vector_view1 = gsl_vector_complex_subvector(input, temp_site_index, 8 );
+      outer_product(temp_mat1,identity_gamma_minus[dir],L->R[site_index]->link[dir]);
 
-      }
+      temp_site_index = hop_index(site_index,1, dir, FORWARD);
+      input_vector_view2 = gsl_vector_complex_subvector(input, temp_site_index, 8 );
+      //Add somsething to do the Hermitian conjugate to this link
+      outer_product(temp_mat2,identity_gamma_plus[dir],L->R[site_index]->link[dir]);
+
+      gsl_blas_zgemv(CblasNoTrans, gsl_complex_rect(-0.5,0.0), temp_mat1, &input_vector_view1.vector, gsl_complex_rect(1.0,0.0), &output_vector_view.vector);
+      gsl_blas_zgemv(CblasNoTrans, gsl_complex_rect(-0.5,0.0), temp_mat2, &input_vector_view2.vector, gsl_complex_rect(1.0,0.0), &output_vector_view.vector);
     }
 
   }
