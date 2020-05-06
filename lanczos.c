@@ -40,7 +40,8 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
   }
   //End vec/matrix testing
   //If changing the value of m in the WD operator, this is where you'll do it
-  gsl_vector_complex_set_all(input,gsl_complex_rect(5.0,0.0));
+  gsl_vector_complex_memcpy(output,input)
+  gsl_vector_complex_set_all(output,gsl_complex_rect(5.0,0.0));
   FORALLSITES(site_index)
   {
     vector_site_index = 8 * site_index;
@@ -134,7 +135,7 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
   //The ctxt argument is a generic pointer so I can re-use Lanczos later for other things
   int j;
   //1. Choose initial vector r = q_0     beta_0 = ||q_0||
-  constructT(T, alpha, beta);
+  T = constructT(alpha, beta,k);
   //2. Begin Loop
   for(j=1;j<k;j++)
   {
@@ -151,10 +152,31 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
     //8. beta_j = ||r||
     beta = Magnitude(r);
     //9. Compute eigenvalues of T_j and Test for convergence
-    appendT(T, alpha, beta);
+    appendT(T, alpha, beta,j);
     QRalgorithm(S,eigenvalues, T,j);
     convergenceTest(S,beta);
   }
   //11. End loop
-
 }
+
+
+gsl_matrix * constructT( alpha, beta,k)
+{
+  gsl_matrix * temp = gsl_matrix_calloc(k,k);
+  gsl_matrix_complex_set(temp,0,0,alpha);
+  gsl_matrix_complex_set(temp,0,1,beta);
+  gsl_matrix_complex_set(temp,1,0,beta);
+  return temp;
+}
+
+
+vectorSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c)
+{
+  
+}
+
+
+grahamSchmidt(r,Q)
+appendT(T, alpha, beta,j)
+QRalgorithm(S,eigenvalues, T,j)
+convergenceTest(S,beta)
