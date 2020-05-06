@@ -6,6 +6,7 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
   gsl_matrix_complex * gamma_matrix[4];
   gsl_matrix_complex * identity_gamma_minus[4];
   gsl_matrix_complex * identity_gamma_plus[4];
+  gsl_matrix_complex * temp_link_conj = gsl_matrix_complex_alloc(2,2);
   gsl_matrix_complex * temp_mat1 = gsl_matrix_complex_alloc(8,8);
   gsl_matrix_complex * temp_mat2 = gsl_matrix_complex_alloc(8,8);
   gsl_vector_complex * temp_vec1 = gsl_vector_complex_alloc(8);
@@ -53,19 +54,38 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
 
       temp_site_index = hop_index(site_index,1, dir, FORWARD);
       input_vector_view2 = gsl_vector_complex_subvector(input, temp_site_index, 8 );
-      //Add somsething to do the Hermitian conjugate to this link
-      outer_product(temp_mat2,identity_gamma_plus[dir],L->R[site_index]->link[dir]);
+      //Add something to do the Hermitian conjugate to this link
+      hermitian_conj(temp_link_conj,L->R[site_index]->link[dir])
+      outer_product(temp_mat2,identity_gamma_plus[dir],temp_link_conj);
 
       gsl_blas_zgemv(CblasNoTrans, gsl_complex_rect(-0.5,0.0), temp_mat1, &input_vector_view1.vector, gsl_complex_rect(1.0,0.0), &output_vector_view.vector);
       gsl_blas_zgemv(CblasNoTrans, gsl_complex_rect(-0.5,0.0), temp_mat2, &input_vector_view2.vector, gsl_complex_rect(1.0,0.0), &output_vector_view.vector);
     }
 
+      gsl_matrix_complex_free(temp_link_conj);
+      gsl_matrix_complex_free(temp_mat1);
+      gsl_matrix_complex_free(temp_mat2);
+      gsl_matrix_complex_free(temp_vec1);
+      gsl_matrix_complex_free(temp_vec2);
   }
 
 
 
 
-
+hermitian_conj(gsl_matrix_complex *out, gsl_matrix_complex *in)
+{
+  gsl_matrix_complex *temp = gsl_matrix_complex_alloc(in->size1,in->size2);
+  int i, j;
+  for(i=0;i<in->size1;i++)
+  {
+    for (j = 0; j < in->size2; j++)
+    {
+      gsl_matrix_complex_set(temp,i,j,gsl_complex_conjugate(gsl_matrix_complex_get(in,j,i))   );
+    }
+  }
+  gsl_matrix_complex_memcpy(out,temp);
+  gsl_matrix_complex_free(temp);
+}
 
 
 

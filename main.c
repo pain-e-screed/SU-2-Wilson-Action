@@ -2,7 +2,8 @@
 
 int main()
 {
-  //rng setup
+
+  rng setup
   gsl_rng * r;
   const gsl_rng_type * T;
   gsl_rng_env_setup();
