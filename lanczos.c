@@ -123,11 +123,52 @@ outer_product(gsl_matrix_complex * w,gsl_matrix_complex * u,gsl_matrix_complex *
   }
 }
 
-compute_gamma_matrices(gsl_matrix_complex ** gamma)
+void compute_gamma_matrices()
 {
   int i;
+  gsl_matrix_complex * gamma_matrix[4];
   FORALLDIR(i)
-    gamma[i] = gsl_matrix_complex_calloc(4,4);
+  {
+    gamma_matrix[i] = gsl_matrix_complex_calloc(4,4);
+  }
+  //gamma_0 really gamma_4
+  gsl_matrix_complex_set(gamma_matrix[0],2,0,gsl_complex_rect(1.0,0.0));
+  gsl_matrix_complex_set(gamma_matrix[0],3,2,gsl_complex_rect(1.0,0.0));
+  gsl_matrix_complex_set(gamma_matrix[0],0,0,gsl_complex_rect(1.0,0.0));
+  gsl_matrix_complex_set(gamma_matrix[0],2,3,gsl_complex_rect(1.0,0.0));
+  //gamma_1
+  gsl_matrix_complex_set(gamma_matrix[1],3,0,gsl_complex_rect(0.0,-1.0));
+  gsl_matrix_complex_set(gamma_matrix[1],2,1,gsl_complex_rect(0.0,-1.0));
+  gsl_matrix_complex_set(gamma_matrix[1],0,3,gsl_complex_rect(0.0,1.0));
+  gsl_matrix_complex_set(gamma_matrix[1],1,2,gsl_complex_rect(0.0,1.0));
+  //gamma_2
+  gsl_matrix_complex_set(gamma_matrix[2],3,0,gsl_complex_rect(1.0,0.0));
+  gsl_matrix_complex_set(gamma_matrix[2],2,1,gsl_complex_rect(-1.0,0.0));
+  gsl_matrix_complex_set(gamma_matrix[2],0,3,gsl_complex_rect(1.0,0.0));
+  gsl_matrix_complex_set(gamma_matrix[2],1,2,gsl_complex_rect(-1.0,0.0));
+  //gamma_3
+  gsl_matrix_complex_set(gamma_matrix[3],2,0,gsl_complex_rect(0.0,-1.0));
+  gsl_matrix_complex_set(gamma_matrix[3],3,2,gsl_complex_rect(0.0,-1.0));
+  gsl_matrix_complex_set(gamma_matrix[3],0,2,gsl_complex_rect(0.0,1.0));
+  gsl_matrix_complex_set(gamma_matrix[3],2,3,gsl_complex_rect(0.0,1.0));
+}
+void compute_gamma_identities()
+{
+  int i;
+  gsl_matrix_complex * gamma_matrix[4];
+  gsl_matrix_complex * identity_gamma_minus[4];
+  gsl_matrix_complex * identity_gamma_plus[4];
+  gsl_matrix_complex * my_identity = gsl_matrix_complex_calloc(4,4);
+  gsl_matrix_complex_set_identity(my_identity);
+  FORALLDIR(i)
+  {
+    identity_gamma_plus[i] = gsl_matrix_complex_calloc(4,4);
+    identity_gamma_minus[i] = gsl_matrix_complex_calloc(4,4);
+    gsl_matrix_complex_memcpy(identity_gamma_minus,my_identity);
+    gsl_matrix_complex_memcpy(identity_gamma_plus,my_identity);
+    gsl_matrix_complex_add(identity_gamma_plus,gamma_matrix[i]);
+    gsl_matrix_complex_sub(identity_gamma_minus,gamma_matrix[i]);
+  }
 }
 
 void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt) , const int k, void * data    )
@@ -172,7 +213,7 @@ gsl_matrix * constructT( alpha, beta,k)
 
 vectorSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c)
 {
-  
+
 }
 
 
