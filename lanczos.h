@@ -9,5 +9,5 @@ hermitian_conj(gsl_matrix_complex *out, gsl_matrix_complex *in);
 outer_product(gsl_matrix_complex * w,gsl_matrix_complex * u,gsl_matrix_complex * v);
 void compute_gamma_matrices();
 void compute_gamma_identities();
-void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt) ,const int k  , void * data  );
+void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt),gsl_vector_complex * q_0 , const int k, void * data    );
 void vectorScaleSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c);

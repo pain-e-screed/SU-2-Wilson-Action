@@ -171,10 +171,11 @@ void compute_gamma_identities()
   }
 }
 
-void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt) , const int k, void * data    )
+void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt),gsl_vector_complex * q_0 , const int k, void * data    )
 {
   //The ctxt argument is a generic pointer so I can re-use Lanczos later for other things
   int j;
+  gsl_matrix_complex * Q = gsl_matrix_complex_alloc(q_0->size,k);
   //1. Choose initial vector r = q_0     beta_0 = ||q_0||
   T = constructT(alpha, beta,k);
   //2. Begin Loop
@@ -216,7 +217,12 @@ void vectorScaleSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c
   gsl_vector_axpby(gsl_complex_rect(1.0,0.0), v, gsl_complex_negative(c), u);
 }
 
-grahamSchmidt(r,Q)
+grahamSchmidt(gsl_vector_complex * r,gsl_matrix_complex * Q)
+{
+  
+}
+
+
 appendT(T, alpha, beta,j)
 QRalgorithm(S,eigenvalues, T,j)
 convergenceTest(S,beta)
