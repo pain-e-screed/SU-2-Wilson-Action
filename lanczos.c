@@ -183,11 +183,11 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
     //3. Normalize vector q_j = r /beta_{j-1}
     //4. Compute r = Aq_j - q_{j-1} beta_{j-1}
     MV(r,q,data);
-    vectorSub(r,qp,betap);
+    vectorscaleSub(r,qp,betap);
     //5. alpha_j = q^T_j  r
     alpha = innerProduct(q,r);
     //6. r = r - q_j alpha _j
-    vectorSub(r,q,alpha);
+    vectorScaleSub(r,q,alpha);
     //7. Orthogonalize r against Q
     grahamSchmidt(r,Q);
     //8. beta_j = ||r||
@@ -210,12 +210,11 @@ gsl_matrix * constructT( alpha, beta,k)
   return temp;
 }
 
-
-vectorSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c)
+//v <- v - c * u
+void vectorScaleSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c)
 {
-
+  gsl_vector_axpby(gsl_complex_rect(1.0,0.0), v, gsl_complex_negative(c), u);
 }
-
 
 grahamSchmidt(r,Q)
 appendT(T, alpha, beta,j)
