@@ -222,8 +222,6 @@ void vectorScaleSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c
 void grahamSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k)
 {
   gsl_vector_complex_view temp_column;
-  gsl_vector_complex * temp = gsl_vector_complex_calloc(Q->size2);
-
   //The columns of q are the vectors that we need to orthogonalize r against
   //k is the column in Q where the new vector will be inserted
   temp_column = gsl_matrix_complex_column(Q,k);
@@ -231,7 +229,19 @@ void grahamSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k
   gramSchmidtStep(Q,k);
   gsl_vector_complex_memcpy(r, &temp_column.vector);
 }
+//Appends alpha and beta values at the jth index along the diagonal
+//Note that j=0 should already be filled from the initialization function
+appendT(gsl_matrix * T, double alpha, double beta, int j)
+{
+  if (j<1) {
+    printf("Incorrect tridiagonal matrix assignment; T has not been initialized properly\n");
+    quit(0);
+  }
+  gsl_matrix_set(T,j,j,alpha);
+  gsl_matrix_set(T,j+1,j,beta);
+  gsl_matrix_set(T,j,j+1,beta);
+}
 
-appendT(T, alpha, beta,j)
+
 QRalgorithm(S,eigenvalues, T,j)
 convergenceTest(S,beta)
