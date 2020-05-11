@@ -190,7 +190,7 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
     //6. r = r - q_j alpha _j
     vectorScaleSub(r,q,alpha);
     //7. Orthogonalize r against Q
-    grahamSchmidt(r,Q);
+    grahamSchmidtInsertion(r,Q);
     //8. beta_j = ||r||
     beta = Magnitude(r);
     //9. Compute eigenvalues of T_j and Test for convergence
@@ -217,11 +217,20 @@ void vectorScaleSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c
   gsl_vector_axpby(gsl_complex_rect(1.0,0.0), v, gsl_complex_negative(c), u);
 }
 
-grahamSchmidt(gsl_vector_complex * r,gsl_matrix_complex * Q)
+// Orthonormalizes r against the previous k-1 orthonormal vectors
+// then inserts r into the kth (index i=k-1) column vector of Q
+void grahamSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k)
 {
-  
-}
+  gsl_vector_complex_view temp_column;
+  gsl_vector_complex * temp = gsl_vector_complex_calloc(Q->size2);
 
+  //The columns of q are the vectors that we need to orthogonalize r against
+  //k is the column in Q where the new vector will be inserted
+  temp_column = gsl_matrix_complex_column(Q,k);
+  gsl_vector_complex_memcpy(&temp_column.vector, r);
+  gramSchmidtStep(Q,k);
+  gsl_vector_complex_memcpy(r, &temp_column.vector);
+}
 
 appendT(T, alpha, beta,j)
 QRalgorithm(S,eigenvalues, T,j)
