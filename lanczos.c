@@ -231,17 +231,25 @@ void grahamSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k
 }
 //Appends alpha and beta values at the jth index along the diagonal
 //Note that j=0 should already be filled from the initialization function
-appendT(gsl_matrix * T, double alpha, double beta, int j)
+void appendT(gsl_matrix * T, double alpha, double beta, int j, int k)
 {
   if (j<1) {
     printf("Incorrect tridiagonal matrix assignment; T has not been initialized properly\n");
     quit(0);
   }
-  gsl_matrix_set(T,j,j,alpha);
-  gsl_matrix_set(T,j+1,j,beta);
-  gsl_matrix_set(T,j,j+1,beta);
+  else if(j<k)
+  {
+    gsl_matrix_set(T,j,j,alpha);
+    gsl_matrix_set(T,j+1,j,beta);
+    gsl_matrix_set(T,j,j+1,beta);
+  }
+  else
+  {
+    gsl_matrix_set(T,j,j,alpha);
+  }
 }
 
-
+//j indicates the index location of the most recent addition to T
 QRalgorithm(S,eigenvalues, T,j)
+
 convergenceTest(S,beta)

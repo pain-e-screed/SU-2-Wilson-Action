@@ -12,4 +12,4 @@ void compute_gamma_identities();
 void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt),gsl_vector_complex * q_0 , const int k, void * data    );
 void vectorScaleSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c);
 void grahamSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k);
-appendT(gsl_matrix * T, double alpha, double beta, int j);
+void appendT(gsl_matrix * T, double alpha, double beta, int j, int k)
