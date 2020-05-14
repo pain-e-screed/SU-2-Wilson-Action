@@ -69,9 +69,7 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
       gsl_matrix_complex_free(temp_vec1);
       gsl_matrix_complex_free(temp_vec2);
   }
-
-
-
+}
 
 hermitian_conj(gsl_matrix_complex *out, gsl_matrix_complex *in)
 {
@@ -89,8 +87,6 @@ hermitian_conj(gsl_matrix_complex *out, gsl_matrix_complex *in)
 }
 
 
-
-}
 //w = u cross v
 outer_product(gsl_matrix_complex * w,gsl_matrix_complex * u,gsl_matrix_complex * v)
 {
@@ -250,6 +246,37 @@ void appendT(gsl_matrix * T, double alpha, double beta, int j, int k)
 }
 
 //j indicates the index location of the most recent addition to T
-QRalgorithm(S,eigenvalues, T,j)
+void QRalgorithm(S, gsl_vector * eig, gsl_matrix * T,const int j)
+{
+  gsl_matrix_view temp_T = gsl_matrix_submatrix(T,0,0,j,j);
+  gsl_matrix * R = gsl_matrix_calloc(j,j);
+  gsl_matrix * Q = gsl_matrix_alloc(j,j);
+  gsl_matrix * A = gsl_matrix_alloc(j,j);
+  gsl_matrix * B = gsl_matrix_alloc(j,j);
+  gsl_matrix * temp_holding_matrix = gsl_matrix_alloc(j,j);
+
+  gsl_matrix_memcpy(A,&temp_T.matrix);
+
+  do
+  {
+    gsl_linalg_QR_decomp_r(A, temp_holding_matrix);
+    gsl_linalg_QR_unpack_r(A, temp_holding_matrix, Q,R);
+    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0d, R, Q, 0.0d, B);
+    gsl_matrix_memcpy(A,B);
+  }while(!QRconvergence(A));
+}
+
+
+QRconvergence(gsl_matrix * A)
+{
+  gsl_matrix * temp1 = gsl_matrix_alloc(A->size1,A->size2);
+  gsl_matrix * temp2 = gsl_matrix_calloc(A->size1,A->size2);
+  gsl_vector_view diag;
+
+  gsl_matrix_memcpy(temp1, A);
+  diag = gsl_matrix_diagonal(A);
+  
+}
+
 
 convergenceTest(S,beta)
