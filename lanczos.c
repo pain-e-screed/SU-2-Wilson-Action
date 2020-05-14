@@ -71,7 +71,7 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
   }
 }
 
-hermitian_conj(gsl_matrix_complex *out, gsl_matrix_complex *in)
+void hermitian_conj(gsl_matrix_complex *out, gsl_matrix_complex *in)
 {
   gsl_matrix_complex *temp = gsl_matrix_complex_alloc(in->size1,in->size2);
   int i, j;
@@ -88,7 +88,7 @@ hermitian_conj(gsl_matrix_complex *out, gsl_matrix_complex *in)
 
 
 //w = u cross v
-outer_product(gsl_matrix_complex * w,gsl_matrix_complex * u,gsl_matrix_complex * v)
+void outer_product(gsl_matrix_complex * w,gsl_matrix_complex * u,gsl_matrix_complex * v)
 {
   int i,j;
   int xshift, yshift;
