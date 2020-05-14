@@ -192,7 +192,8 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
     //9. Compute eigenvalues of T_j and Test for convergence
     appendT(T, alpha, beta,j);
     QRalgorithm(S,eigenvalues, T,j);
-    convergenceTest(S,beta,j);
+    if(convergenceTest(S,beta,j) < 1.0E-10);
+      printf("Eigenvalues converged for j = %d\n",j );
   }
   //11. End loop
 }
@@ -336,4 +337,20 @@ void absMatrix(gsl_matrix * M)
 }
 
 
-convergenceTest(S,beta)
+double convergenceTest(gsl_matrix * S,double beta,int j)
+{
+
+  double vec_max, vec_min;
+  int N_rows = S->size1
+  gsl_vector *temp_vec = gsl_vector_alloc(S->size1);
+  gsl_vector_const_view S_column = gsl_matrix_const_column(S,j);
+
+  gsl_vector_memcpy(temp_vec,&S_column.vector);
+  gsl_vector_scale(temp_vec,beta);
+  vec_max = gsl_vector_max(temp_vec);
+  vec_min = -gsl_vector_min(temp_vec);
+  if( vec_max>vec_min )
+    return  vec_max;
+  else
+    return vec_min;
+}
