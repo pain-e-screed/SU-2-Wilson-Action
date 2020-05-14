@@ -249,6 +249,7 @@ void appendT(gsl_matrix * T, double alpha, double beta, int j, int k)
 void QRalgorithm(S, gsl_vector * eig, gsl_matrix * T,const int j)
 {
   gsl_matrix_view temp_T = gsl_matrix_submatrix(T,0,0,j,j);
+  gsl_vector_view diag_view;
   gsl_matrix * R = gsl_matrix_calloc(j,j);
   gsl_matrix * Q = gsl_matrix_alloc(j,j);
   gsl_matrix * A = gsl_matrix_alloc(j,j);
@@ -264,10 +265,12 @@ void QRalgorithm(S, gsl_vector * eig, gsl_matrix * T,const int j)
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0d, R, Q, 0.0d, B);
     gsl_matrix_memcpy(A,B);
   }while(!QRconvergence(A));
+  diag_view = gsl_matrix_diagonal(A);
+  gsl_vector_memcpy(eig,&diag_view.vector);
 }
 
 
-QRconvergence(gsl_matrix * A)
+bool QRconvergence(gsl_matrix * A)
 {
   gsl_matrix * temp1 = gsl_matrix_alloc(A->size1,A->size2);
   gsl_matrix * temp2 = gsl_matrix_calloc(A->size1,A->size2);
@@ -275,7 +278,13 @@ QRconvergence(gsl_matrix * A)
 
   gsl_matrix_memcpy(temp1, A);
   diag = gsl_matrix_diagonal(A);
-
+  setDiagonal(temp2, &diag.vector);
+  gsl_matrix_sub(temp1, temp2);
+  absMatrix(temp1);
+  if(gsl_matrix_max(temp1) < 1.0E-10 )
+    return true;
+  else
+    return false;
 }
 
 void setDiagonal(gsl_vector * diag, gsl_matrix * M)
@@ -287,14 +296,19 @@ void setDiagonal(gsl_vector * diag, gsl_matrix * M)
     }
 }
 
-void AbsMatrix(gsl_matrix * M)
+void absMatrix(gsl_matrix * M)
 {
   int i,j;
+  double temp;
   for(i=0;i< M->size1 ;i++)
   {
     for(j=0;j<M->size2 ;j++)
     {
-      
+      if(gsl_matrix_get(M,i,j) < 0.0  )
+      {
+        temp =  - gsl_matrix_get(M,i,j);
+        gsl_matrix_set(M,i,j,temp);
+      }
     }
   }
 }
