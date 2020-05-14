@@ -275,7 +275,28 @@ QRconvergence(gsl_matrix * A)
 
   gsl_matrix_memcpy(temp1, A);
   diag = gsl_matrix_diagonal(A);
-  
+
+}
+
+void setDiagonal(gsl_vector * diag, gsl_matrix * M)
+{
+    int i;
+    for(i=0;i<diag->size ;i++)
+    {
+      gsl_matrix_set(M,i,i,gsl_vector_get(diag,i));
+    }
+}
+
+void AbsMatrix(gsl_matrix * M)
+{
+  int i,j;
+  for(i=0;i< M->size1 ;i++)
+  {
+    for(j=0;j<M->size2 ;j++)
+    {
+      
+    }
+  }
 }
 
 
