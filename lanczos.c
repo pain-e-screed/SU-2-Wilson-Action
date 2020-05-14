@@ -192,7 +192,7 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
     //9. Compute eigenvalues of T_j and Test for convergence
     appendT(T, alpha, beta,j);
     QRalgorithm(S,eigenvalues, T,j);
-    convergenceTest(S,beta);
+    convergenceTest(S,beta,j);
   }
   //11. End loop
 }
@@ -246,27 +246,49 @@ void appendT(gsl_matrix * T, double alpha, double beta, int j, int k)
 }
 
 //j indicates the index location of the most recent addition to T
-void QRalgorithm(S, gsl_vector * eig, gsl_matrix * T,const int j)
+int QRalgorithm(gsl_matrix * S, gsl_vector * eig, gsl_matrix * T,const int j)
 {
   gsl_matrix_view temp_T = gsl_matrix_submatrix(T,0,0,j,j);
   gsl_vector_view diag_view;
   gsl_matrix * R = gsl_matrix_calloc(j,j);
   gsl_matrix * Q = gsl_matrix_alloc(j,j);
+  gsl_matrix * Q_total = gsl_matrix_alloc(j,j);
+  gsl_matrix * Q_temp = gsl_matrix_alloc(j,j);
   gsl_matrix * A = gsl_matrix_alloc(j,j);
   gsl_matrix * B = gsl_matrix_alloc(j,j);
   gsl_matrix * temp_holding_matrix = gsl_matrix_alloc(j,j);
+  int count = 0;
 
   gsl_matrix_memcpy(A,&temp_T.matrix);
-
+  gsl_matrix_complex_set_identity(Q_total);
   do
   {
     gsl_linalg_QR_decomp_r(A, temp_holding_matrix);
     gsl_linalg_QR_unpack_r(A, temp_holding_matrix, Q,R);
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0d, R, Q, 0.0d, B);
+    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0d, Q_total, Q, 0.0d, Q_temp);
     gsl_matrix_memcpy(A,B);
+    gsl_matrix_memcpy(Q_total,Q_temp);
+    count++;
+    if(count > 9999)
+    {
+      printf("QR algorithm didn't converge\n");
+      exit(0);
+    }
   }while(!QRconvergence(A));
+
   diag_view = gsl_matrix_diagonal(A);
   gsl_vector_memcpy(eig,&diag_view.vector);
+  gsl_matrix_memcpy(S,Q_total);
+
+  gsl_matrix_free(R);
+  gsl_matrix_free(Q);
+  gsl_matrix_free(Q_total);
+  gsl_matrix_free(Q_temp);
+  gsl_matrix_free(A);
+  gsl_matrix_free(B);
+  gsl_matrix_free(temp_holding_matrix);
+  return count;
 }
 
 
