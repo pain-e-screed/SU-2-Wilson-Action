@@ -71,6 +71,28 @@ void WilsonDirac( gsl_vector_complex * output,gsl_vector_complex * input, void *
   }
 }
 
+gsl_vector_complex * randomComplexVector(long unsigned length)
+{
+  gsl_vector_complex * temp = gsl_vector_complex_calloc(length);
+
+   gsl_rng * r;
+   const gsl_rng_type * T;
+   gsl_rng_env_setup();
+   T = gsl_rng_default;
+   r = gsl_rng_alloc(T);
+   gsl_rng_set(r,time_seed());
+
+   unsigned long filling,i;
+   filling =  gsl_rng_uniform_int(r, length);
+
+   for ( i=0; i< filling;i++)
+   {
+     gsl_vector_complex_set(temp, gsl_rng_uniform_int(r, length), gsl_complex_rect( gsl_ran_gaussian( r, 1.0) ,gsl_ran_gaussian( r, 1.0) ) );
+   }
+   normalize(temp,temp);
+   return temp;
+}
+
 void hermitian_conj(gsl_matrix_complex *out, gsl_matrix_complex *in)
 {
   gsl_matrix_complex *temp = gsl_matrix_complex_alloc(in->size1,in->size2);
