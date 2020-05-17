@@ -1,5 +1,8 @@
 #include "includes.h"
 
+#ifndef __LANCZOS_ROUTINES
+#define __LANCZOS_ROUTINES
+
 extern gsl_matrix_complex * gamma_matrix[4];
 extern gsl_matrix_complex * identity_gamma_minus[4];
 extern gsl_matrix_complex * identity_gamma_plus[4];
@@ -19,3 +22,5 @@ bool QRconvergence(gsl_matrix * A);
 void setDiagonal(gsl_vector * diag, gsl_matrix * M);
 void absMatrix(gsl_matrix * M);
 double convergenceTest(gsl_matrix * S,double beta,int j);
+
+#endif
