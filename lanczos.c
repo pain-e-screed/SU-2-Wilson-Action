@@ -193,33 +193,46 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
 {
   //The ctxt argument is a generic pointer so I can re-use Lanczos later for other things
   int j;
-  gsl_matrix_complex * Q = gsl_matrix_complex_alloc(q_0->size,k);
+  double beta,alpha;
+  gsl_matrix_complex * Q = gsl_matrix_complex_alloc(q_0->size,k+1);
+  gsl_matrix_complex * S = gsl_matrix_complex_calloc(k,k);
+  gsl_vector_complex * r = gsl_vector_complex_alloc(q_0->size);
+  gsl_vector_complex * q = gsl_vector_complex_alloc(q_0->size);
+  gsl_vector_complex * q_p = gsl_vector_complex_alloc(q_0->size);
+  gsl_matrix_complex_view T_view;
+  gsl_matrix_complex_view S_view;
 
-
-
-
-  //1. Choose initial vector r = q_0     beta_0 = ||q_0||
+  gsl_vector_complex_memcpy(r,q_0);
+  gramSchmidtInsertion(r,Q,0);
+  beta = GSL_REAL( innerProduct(r,r)  );
   T = constructT(k);
   //2. Begin Loop
+  gsl_vector_complex_memcpy(q,r);
+  gsl_vector_complex_memcpy(q_p,r);
   for(j=1;j<k;j++)
   {
-    //3. Normalize vector q_j = r /beta_{j-1}
+    //3. Normalize vector q_j = r /beta_{j-1}- This is done automatically in the GSinsertation
     //4. Compute r = Aq_j - q_{j-1} beta_{j-1}
     MV(r,q,data);
-    vectorscaleSub(r,qp,betap);
+    vectorscaleSub(r,q_p,beta);
     //5. alpha_j = q^T_j  r
-    alpha = innerProduct(q,r);
+    alpha = GSL_REAL(innerProduct(q,r));
     //6. r = r - q_j alpha _j
     vectorScaleSub(r,q,alpha);
     //7. Orthogonalize r against Q
+    beta = Magnitude(r);
     gramSchmidtInsertion(r,Q,j);
     //8. beta_j = ||r||
-    beta = Magnitude(r);
     //9. Compute eigenvalues of T_j and Test for convergence
-    appendT(T, alpha, beta,j);
-    QRalgorithm(S,eigenvalues, T,j);
+    T_view = gsl_matrix_complex_submatrix(T,0,0,j,j);
+    S_view = gsl_matrix_complex_submatrix(S,0,0,j,j);
+    appendT(T, alpha, beta,j-1);
+    QRalgorithm(&S_view.matrix,eigenvalues, &T_view.matrix,j);
     if(convergenceTest(S,beta,j) < 1.0E-10);
       printf("Eigenvalues converged for j = %d\n",j );
+    gsl_vector_complex_memcpy(q_p,q);
+    gsl_vector_complex_memcpy(q,r);
+
   }
   //11. End loop
 }
@@ -249,15 +262,11 @@ void gramSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k)
   gramSchmidtStep(Q,k);
   gsl_vector_complex_memcpy(r, &temp_column.vector);
 }
-//Appends alpha and beta values at the jth index along the diagonal
-//Note that j=0 should already be filled from the initialization function
+
+
 void appendT(gsl_matrix * T, double alpha, double beta, int j, int k)
 {
-  if (j<1) {
-    printf("Incorrect tridiagonal matrix assignment; T has not been initialized properly\n");
-    quit(0);
-  }
-  else if(j<k)
+  if(j<k-1)
   {
     gsl_matrix_set(T,j,j,alpha);
     gsl_matrix_set(T,j+1,j,beta);
@@ -366,7 +375,7 @@ double convergenceTest(gsl_matrix * S,double beta,int j)
   double vec_max, vec_min;
   int N_rows = S->size1
   gsl_vector *temp_vec = gsl_vector_alloc(S->size1);
-  gsl_vector_const_view S_column = gsl_matrix_const_column(S,j);
+  gsl_vector_const_view S_column = gsl_matrix_const_column(S,j-1);
 
   gsl_vector_memcpy(temp_vec,&S_column.vector);
   gsl_vector_scale(temp_vec,beta);
