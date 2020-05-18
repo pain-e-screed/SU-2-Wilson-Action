@@ -14,7 +14,7 @@ void outer_product(gsl_matrix_complex * w,gsl_matrix_complex * u,gsl_matrix_comp
 void compute_gamma_matrices();
 void compute_gamma_identities();
 void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt),gsl_vector_complex * q_0 , const int k, void * data    );
-gsl_matrix * constructT( alpha, beta,k);
+gsl_matrix * constructT(k);
 void vectorScaleSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c);
 void gramSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k);
 void appendT(gsl_matrix * T, double alpha, double beta, int j, int k)

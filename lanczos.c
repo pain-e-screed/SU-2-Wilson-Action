@@ -194,8 +194,12 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
   //The ctxt argument is a generic pointer so I can re-use Lanczos later for other things
   int j;
   gsl_matrix_complex * Q = gsl_matrix_complex_alloc(q_0->size,k);
+
+
+
+
   //1. Choose initial vector r = q_0     beta_0 = ||q_0||
-  T = constructT(alpha, beta,k);
+  T = constructT(k);
   //2. Begin Loop
   for(j=1;j<k;j++)
   {
@@ -208,7 +212,7 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
     //6. r = r - q_j alpha _j
     vectorScaleSub(r,q,alpha);
     //7. Orthogonalize r against Q
-    gramSchmidtInsertion(r,Q);
+    gramSchmidtInsertion(r,Q,j);
     //8. beta_j = ||r||
     beta = Magnitude(r);
     //9. Compute eigenvalues of T_j and Test for convergence
@@ -221,12 +225,9 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
 }
 
 
-gsl_matrix * constructT( alpha, beta,k)
+gsl_matrix * constructT(k)
 {
   gsl_matrix * temp = gsl_matrix_calloc(k,k);
-  gsl_matrix_complex_set(temp,0,0,alpha);
-  gsl_matrix_complex_set(temp,0,1,beta);
-  gsl_matrix_complex_set(temp,1,0,beta);
   return temp;
 }
 
@@ -238,7 +239,7 @@ void vectorScaleSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c
 
 // Orthonormalizes r against the previous k-1 orthonormal vectors
 // then inserts r into the kth (index i=k-1) column vector of Q
-void grahamSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k)
+void gramSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k)
 {
   gsl_vector_complex_view temp_column;
   //The columns of q are the vectors that we need to orthogonalize r against
