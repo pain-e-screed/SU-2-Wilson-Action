@@ -3,26 +3,36 @@
 int main()
 {
 
-  rng setup
-  gsl_rng * r;
-  const gsl_rng_type * T;
-  gsl_rng_env_setup();
-  T = gsl_rng_default;
-  r = gsl_rng_alloc(T);
-  gsl_rng_set(r,time_seed());
-  int r_max = gsl_rng_max(r);
-  printf("RNG setup completed\n");
+  char file_name[30], overwrite = "y";
+  printf("Please enter the filename you wish to use for the lattice\n");
+  scanf("%s",file_name);
+  if(!access(file_name,F_OK))
+  {
+    printf("A lattice config file with this name has already been generated." );
+    printf("Would you like to overwrite the file? y/n: " );
+    scanf(" %c\n",&overwrite );
+  }
 
-  //Allocate and Initalize Lattice
-  lattice * L = lattice_allocation();
-  printf("L occupies %lu bytes\n",sizeof(lattice ));
-  printf("Lattice allocated\n The lattice has %d sites with %d link fields\n",L4,4*L4);
-  initialize_lattice(r,L);
-  printf("Lattice initalized\n");
-  AnnealingSchedule(L,r);
-  printf("lattice annealed\n");
+  if(overwrite = "y")
+  {
+    if(!RunLatticeSimulation( file_name))
+      printf("Lattice written to config file\n" );
+  }
+  else if(overwrite = "n")
+  {
+    printf("Skipping simulation and going straight to Lanczos\n" );
+  }
+  else
+  {
+    printf("This is not a valid input\n" );
+    return 0;
+  }
 
-  lattice_free(L);
-  gsl_rng_free(r);
-  return 0;
+  lattice * L;
+  gsl_vector_complex * q = randomComplexVector(8*N4);
+  latticeUnpack(L,file_name);
+  void (*f_ptr) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt) = &WilsonDirac;
+
+  Lanczos(f_ptr,q , 10, L );
+
 }
