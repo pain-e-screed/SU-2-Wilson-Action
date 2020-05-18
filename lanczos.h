@@ -16,7 +16,7 @@ void compute_gamma_identities();
 void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt),gsl_vector_complex * q_0 , const int k, void * data    );
 gsl_matrix * constructT( alpha, beta,k);
 void vectorScaleSub(gsl_vector_complex * v,gsl_vector_complex * u, gsl_complex c);
-void grahamSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k);
+void gramSchmidtInsertion(gsl_vector_complex * r,gsl_matrix_complex * Q, int k);
 void appendT(gsl_matrix * T, double alpha, double beta, int j, int k)
 int QRalgorithm(gsl_matrix * S, gsl_vector * eig, gsl_matrix * T,const int j);
 bool QRconvergence(gsl_matrix * A);

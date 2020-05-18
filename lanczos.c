@@ -208,7 +208,7 @@ void Lanczos( void (*MV) (gsl_vector_complex *,gsl_vector_complex *, void * ctxt
     //6. r = r - q_j alpha _j
     vectorScaleSub(r,q,alpha);
     //7. Orthogonalize r against Q
-    grahamSchmidtInsertion(r,Q);
+    gramSchmidtInsertion(r,Q);
     //8. beta_j = ||r||
     beta = Magnitude(r);
     //9. Compute eigenvalues of T_j and Test for convergence
